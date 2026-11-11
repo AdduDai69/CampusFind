@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: header('Campus Find – Browse Items')}"></head>
+<body>
+
+    <!-- Navigation -->
+    <div th:replace="~{fragments/layout :: navbar('browse')}"></div>
+
+    <!-- Alert Messages -->
+    <div th:replace="~{fragments/layout :: alerts}"></div>
+
+    <main class="container py-4">
+        <!-- Header -->
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
+            <div>
+                <span class="text-uppercase text-secondary fw-bold small tracking-wider">Search &amp; Catalog</span>
+                <h1 class="h2 fw-bold text-white mb-1">Browse Campus Belongings</h1>
+                <p class="text-secondary mb-0">Search and filter active lost or found items across all campus buildings.</p>
+            </div>
+            <div class="d-flex gap-2">
+                <a th:href="@{/report?type=LOST}" class="btn btn-lost-crimson btn-sm d-flex align-items-center gap-1">
+                    <i class="bi bi-plus-circle"></i> Report Lost
+                </a>
+                <a th:href="@{/report?type=FOUND}" class="btn btn-found-emerald btn-sm d-flex align-items-center gap-1">
+                    <i class="bi bi-plus-circle"></i> Report Found
+                </a>
+            </div>
+        </div>
+
+        <!-- Filter & Search Card -->
+        <div class="cf-card p-4 mb-4">
+            <form id="filterForm" th:action="@{/browse}" method="get">
+                <div class="row g-3">
+                    <!-- Search Input -->
+                    <div class="col-lg-4">
+                        <label class="form-label">Search Query</label>
+                        <div class="input-group">
+                            <span class="input-group-text border-0 text-white" style="background-color: var(--bg-surface); border: 1px solid var(--border-medium); border-right: none;">
+                                <i class="bi bi-search"></i>
+                            </span>
+                            <input type="text" id="searchKeyword" name="keyword" class="form-control cf-input" 
+                                   th:value="${keyword}" 
+                                   placeholder="Search by name, building, description..."
+                                   style="border-left: none;">
+                        </div>
+                    </div>
+
+                    <!-- Report Type Filter -->
+                    <div class="col-sm-6 col-lg-2">
+                        <label class="form-label">Item Type</label>
+                        <select name="type" class="form-select cf-select" onchange="this.form.submit()">
+                            <option value="ALL" th:selected="${selectedType == 'ALL'}">All Types</option>
+                            <option value="LOST" th:selected="${selectedType == 'LOST'}">Lost Items</option>
+                            <option value="FOUND" th:selected="${selectedType == 'FOUND'}">Found Items</option>
+                        </select>
+                    </div>
+
+                    <!-- Category Filter -->
+                    <div class="col-sm-6 col-lg-3">
+                        <label class="form-label">Category</label>
+                        <select name="category" class="form-select cf-select" onchange="this.form.submit()">
+                            <option value="ALL" th:selected="${selectedCategory == 'ALL'}">All Categories</option>
+                            <option th:each="cat : ${categories}" 
+                                    th:value="${cat}" 
+                                    th:text="${cat}" 
+                                    th:selected="${selectedCategory == cat}">Electronics</option>
+                        </select>
+                    </div>
+
+                    <!-- Status Filter -->
+                    <div class="col-sm-6 col-lg-2">
+                        <label class="form-label">Recovery Status</label>
+                        <select name="status" class="form-select cf-select" onchange="this.form.submit()">
+                            <option value="ALL" th:selected="${selectedStatus == 'ALL'}">All Statuses</option>
+                            <option value="PENDING" th:selected="${selectedStatus == 'PENDING'}">Pending</option>
+                            <option value="RECOVERED" th:selected="${selectedStatus == 'RECOVERED'}">Recovered</option>
+                        </select>
+                    </div>
+
+                    <!-- Submit & Reset Buttons -->
+                    <div class="col-sm-6 col-lg-1 d-flex align-items-end gap-2">
+                        <button type="submit" class="btn btn-stark-white w-100 py-2" title="Apply Filters">
+                            <i class="bi bi-funnel-fill"></i>
+                        </button>
+                        <a th:href="@{/browse}" class="btn btn-cf-outline py-2" title="Reset Filters">
+                            <i class="bi bi-arrow-counterclockwise"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Quick Type Filter Buttons Row -->
+                <div class="d-flex flex-wrap align-items-center gap-2 mt-3 pt-3 border-top" style="border-color: var(--border-subtle) !important;">
+                    <span class="small text-secondary me-2">Type shortcuts:</span>
+                    <a th:href="@{/browse(keyword=${keyword}, category=${selectedCategory}, status=${selectedStatus}, type='ALL')}" 
+                       class="filter-btn" th:classappend="${selectedType == 'ALL'} ? 'active' : ''">
+                       All
+                    </a>
+                    <a th:href="@{/browse(keyword=${keyword}, category=${selectedCategory}, status=${selectedStatus}, type='LOST')}" 
+                       class="filter-btn" th:classappend="${selectedType == 'LOST'} ? 'active' : ''">
+                       <i class="bi bi-exclamation-circle text-danger"></i> Lost Items
+                    </a>
+                    <a th:href="@{/browse(keyword=${keyword}, category=${selectedCategory}, status=${selectedStatus}, type='FOUND')}" 
+                       class="filter-btn" th:classappend="${selectedType == 'FOUND'} ? 'active' : ''">
+                       <i class="bi bi-check-circle text-success"></i> Found Items
+                    </a>
+
+                    <div class="ms-auto small text-secondary">
+                        Showing <strong class="text-white" th:text="${resultCount}">12</strong> items
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <!-- Items Listing Grid -->
+        <div th:if="${#lists.isEmpty(items)}" class="cf-card p-5 text-center my-5">
+            <div class="mb-3">
+                <i class="bi bi-inbox text-secondary" style="font-size: 3.5rem;"></i>
+            </div>
+            <h4 class="text-white fw-bold mb-2">No Matching Items Found</h4>
+            <p class="text-secondary max-w-md mx-auto mb-4">
+                We couldn't find any reports matching your search and filter criteria. Try adjusting your query or reset filters.
+            </p>
+            <div class="d-flex justify-content-center gap-2">
+                <a th:href="@{/browse}" class="btn btn-stark-white">
+                    <i class="bi bi-arrow-counterclockwise me-1"></i> Reset All Filters
+                </a>
+                <a th:href="@{/report}" class="btn btn-cf-outline">
+                    <i class="bi bi-plus-lg me-1"></i> Report Item
+                </a>
+            </div>
+        </div>
+
+        <div th:if="${not #lists.isEmpty(items)}" class="row g-4">
+            <div th:each="item : ${items}" class="col-md-6 col-lg-4">
+                <div class="cf-card cf-card-hover h-100 d-flex flex-column">
+                    <!-- Graphic Header Placeholder -->
+                    <div class="item-card-header" th:classappend="${item.isLost()} ? 'header-lost' : 'header-found'">
+                        <i class="bi item-card-icon" 
+                           th:classappend="${item.getCategoryIcon()}" 
+                           th:style="${item.isLost()} ? 'color: #FB7185;' : 'color: #34D399;'"></i>
+
+                        <!-- Badges -->
+                        <div class="position-absolute top-0 start-0 m-3">
+                            <span th:if="${item.isLost()}" class="badge-lost">
+                                <i class="bi bi-exclamation-circle-fill"></i> Lost
+                            </span>
+                            <span th:if="${item.isFound()}" class="badge-found">
+                                <i class="bi bi-check-circle-fill"></i> Found
+                            </span>
+                        </div>
+
+                        <div class="position-absolute top-0 end-0 m-3">
+                            <span th:if="${item.isRecovered()}" class="badge-recovered">
+                                <i class="bi bi-check-all"></i> Recovered
+                            </span>
+                            <span th:if="${item.isPending()}" class="badge-pending">
+                                <i class="bi bi-clock-history"></i> Pending
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Content -->
+                    <div class="cf-card-inner flex-grow-1 d-flex flex-column">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="badge-category" th:text="${item.category}">Electronics</span>
+                            <span class="text-secondary small">
+                                <i class="bi bi-calendar3 me-1"></i>
+                                <span th:text="${item.dateReported}">2026-10-31</span>
+                            </span>
+                        </div>
+
+                        <h5 class="fw-bold text-white mb-2" th:text="${item.name}">MacBook Pro</h5>
+
+                        <p class="text-secondary small flex-grow-1 mb-3" 
+                           style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;"
+                           th:text="${item.description}">
+                            Description text...
+                        </p>
+
+                        <div class="p-2 rounded-3 mb-3" style="background-color: var(--bg-surface); border: 1px solid var(--border-subtle);">
+                            <div class="text-secondary small text-truncate">
+                                <i class="bi bi-geo-alt-fill text-white me-1"></i>
+                                <span th:text="${item.location}">Engineering Room 302</span>
+                            </div>
+                        </div>
+
+                        <div class="d-flex gap-2">
+                            <a th:href="@{'/items/' + ${item.id}}" class="btn btn-cf-outline w-100 text-center py-2">
+                                <i class="bi bi-arrow-up-right me-1"></i> View Details
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <div th:replace="~{fragments/layout :: footer}"></div>
+
+    <!-- Scripts -->
+    <div th:replace="~{fragments/layout :: scripts}"></div>
+</body>
+</html>

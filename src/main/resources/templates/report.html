@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: header('Campus Find – Report Lost or Found Item')}"></head>
+<body>
+
+    <!-- Navigation -->
+    <div th:replace="~{fragments/layout :: navbar('report')}"></div>
+
+    <!-- Alert Messages -->
+    <div th:replace="~{fragments/layout :: alerts}"></div>
+
+    <main class="container py-4">
+        <div class="row justify-content-center">
+            <div class="col-lg-9 col-xl-8">
+                <!-- Page Title -->
+                <div class="text-center mb-4">
+                    <span class="text-uppercase text-secondary fw-bold small tracking-wider">Campus Registration</span>
+                    <h1 class="h2 fw-bold text-white mb-2">Report a Lost or Found Item</h1>
+                    <p class="text-secondary max-w-lg mx-auto">
+                        Provide accurate details to ensure our centralized tracking system and campus security can identify the rightful owner.
+                    </p>
+                </div>
+
+                <!-- Form Card -->
+                <div class="cf-card p-4 p-md-5 mb-4">
+                    <form th:action="@{/items}" th:object="${item}" method="post">
+                        
+                        <!-- Validation summary error box -->
+                        <div th:if="${#fields.hasErrors('*')}" class="alert alert-cf-error mb-4" role="alert">
+                            <div class="d-flex align-items-center gap-2 fw-bold mb-1">
+                                <i class="bi bi-exclamation-triangle-fill"></i> Please fix the following errors:
+                            </div>
+                            <ul class="mb-0 ps-3 small">
+                                <li th:each="err : ${#fields.errors('*')}" th:text="${err}">Error message</li>
+                            </ul>
+                        </div>
+
+                        <!-- 1. Report Type Selector -->
+                        <div class="mb-4">
+                            <label class="form-label d-block mb-2">Report Type <span class="text-danger">*</span></label>
+                            <div class="row g-3">
+                                <div class="col-sm-6">
+                                    <input type="radio" class="btn-check" name="type" id="typeLost" value="LOST" 
+                                           th:field="*{type}" autocomplete="off">
+                                    <label class="btn w-100 p-3 text-start rounded-4 type-select-card" for="typeLost"
+                                           style="background: var(--bg-surface); border: 2px solid var(--border-medium); color: #FFF; cursor: pointer;">
+                                        <div class="d-flex align-items-center gap-3">
+                                            <div class="rounded-circle p-2 d-flex align-items-center justify-content-center" 
+                                                 style="width: 44px; height: 44px; background: var(--lost-ruby-bg); color: #FB7185;">
+                                                <i class="bi bi-exclamation-triangle-fill fs-5"></i>
+                                            </div>
+                                            <div>
+                                                <div class="fw-bold">I Lost an Item</div>
+                                                <div class="small text-secondary">Missing personal property</div>
+                                            </div>
+                                        </div>
+                                    </label>
+                                </div>
+
+                                <div class="col-sm-6">
+                                    <input type="radio" class="btn-check" name="type" id="typeFound" value="FOUND" 
+                                           th:field="*{type}" autocomplete="off">
+                                    <label class="btn w-100 p-3 text-start rounded-4 type-select-card" for="typeFound"
+                                           style="background: var(--bg-surface); border: 2px solid var(--border-medium); color: #FFF; cursor: pointer;">
+                                        <div class="d-flex align-items-center gap-3">
+                                            <div class="rounded-circle p-2 d-flex align-items-center justify-content-center" 
+                                                 style="width: 44px; height: 44px; background: var(--found-emerald-bg); color: #34D399;">
+                                                <i class="bi bi-check-circle-fill fs-5"></i>
+                                            </div>
+                                            <div>
+                                                <div class="fw-bold">I Found an Item</div>
+                                                <div class="small text-secondary">Discovered or handed over</div>
+                                            </div>
+                                        </div>
+                                    </label>
+                                </div>
+                            </div>
+                            <div th:if="${#fields.hasErrors('type')}" class="text-danger small mt-1" th:errors="*{type}"></div>
+                        </div>
+
+                        <!-- 2. Item Name & Category Row -->
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-7">
+                                <label for="name" class="form-label">Item Name / Title <span class="text-danger">*</span></label>
+                                <input type="text" id="name" th:field="*{name}" class="form-control cf-input" 
+                                       placeholder="e.g. Space Gray MacBook Pro 14, Blue Hydro Flask..." required>
+                                <div th:if="${#fields.hasErrors('name')}" class="text-danger small mt-1" th:errors="*{name}"></div>
+                            </div>
+
+                            <div class="col-md-5">
+                                <label for="category" class="form-label">Category <span class="text-danger">*</span></label>
+                                <select id="category" th:field="*{category}" class="form-select cf-select" required>
+                                    <option value="">Select Category</option>
+                                    <option th:each="cat : ${categories}" th:value="${cat}" th:text="${cat}">Electronics</option>
+                                </select>
+                                <div th:if="${#fields.hasErrors('category')}" class="text-danger small mt-1" th:errors="*{category}"></div>
+                            </div>
+                        </div>
+
+                        <!-- 3. Campus Location & Date Reported Row -->
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-7">
+                                <label for="location" class="form-label">Campus Location <span class="text-danger">*</span></label>
+                                <input type="text" id="location" th:field="*{location}" class="form-control cf-input" 
+                                       placeholder="e.g. Central Library 2nd Floor, Room 302, Cafeteria Table 4..." required>
+                                <div class="form-text text-secondary small">Be as specific as possible (building, floor, room number).</div>
+                                <div th:if="${#fields.hasErrors('location')}" class="text-danger small mt-1" th:errors="*{location}"></div>
+                            </div>
+
+                            <div class="col-md-5">
+                                <label for="dateReported" class="form-label">Date Lost or Found <span class="text-danger">*</span></label>
+                                <input type="date" id="dateReported" th:field="*{dateReported}" class="form-control cf-input" required>
+                                <div th:if="${#fields.hasErrors('dateReported')}" class="text-danger small mt-1" th:errors="*{dateReported}"></div>
+                            </div>
+                        </div>
+
+                        <!-- 4. Detailed Description -->
+                        <div class="mb-4">
+                            <label for="description" class="form-label">Detailed Description <span class="text-danger">*</span></label>
+                            <textarea id="description" th:field="*{description}" class="form-control cf-textarea" rows="4" 
+                                      placeholder="Describe brand, color, stickers, model numbers, distinguishing marks, scratches, or contents inside..." required></textarea>
+                            <div class="form-text text-secondary small">Provide distinctive details that only the true owner would recognize.</div>
+                            <div th:if="${#fields.hasErrors('description')}" class="text-danger small mt-1" th:errors="*{description}"></div>
+                        </div>
+
+                        <!-- 5. Contact Information -->
+                        <div class="mb-4">
+                            <label for="contact" class="form-label">Your Contact Information <span class="text-secondary small">(Optional but recommended)</span></label>
+                            <input type="text" id="contact" th:field="*{contact}" class="form-control cf-input" 
+                                   placeholder="e.g. alex.t@campus.edu, (555) 123-4567, or Dormitory Room #204">
+                            <div class="form-text text-secondary small">Used solely by students or campus security to facilitate return of the item.</div>
+                        </div>
+
+                        <!-- Initial Status hidden field -->
+                        <input type="hidden" th:field="*{status}" value="PENDING">
+
+                        <!-- Submit Buttons -->
+                        <div class="d-flex flex-column flex-sm-row justify-content-between align-items-center gap-3 mt-4 pt-3 border-top" 
+                             style="border-color: var(--border-subtle) !important;">
+                            <a th:href="@{/browse}" class="btn btn-cf-outline w-100 w-sm-auto">
+                                <i class="bi bi-arrow-left me-1"></i> Cancel
+                            </a>
+                            <button type="submit" class="btn btn-stark-white w-100 w-sm-auto px-5 py-3">
+                                <i class="bi bi-send-fill me-1"></i> Submit Report
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Helpful Tips Box -->
+                <div class="p-4 rounded-4" style="background: rgba(14, 16, 21, 0.6); border: 1px dashed var(--border-medium);">
+                    <div class="d-flex align-items-center gap-2 mb-2 text-white fw-bold small">
+                        <i class="bi bi-shield-check"></i> Safe Campus Retrieval Tips
+                    </div>
+                    <ul class="text-secondary small mb-0 ps-3">
+                        <li>High-value electronics (laptops, phones) are held at the Central Campus Safety Office (Building 12).</li>
+                        <li>When claiming an item, be prepared to present your University Student ID or unlock electronic devices.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <div th:replace="~{fragments/layout :: footer}"></div>
+
+    <!-- Scripts -->
+    <div th:replace="~{fragments/layout :: scripts}"></div>
+</body>
+</html>

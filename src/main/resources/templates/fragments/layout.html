@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:fragment="header(title)">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${title} ?: 'Campus Find – Smart Lost & Found'">Campus Find – Smart Lost & Found</title>
+    
+    <!-- Google Fonts: Plus Jakarta Sans -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+    <!-- Bootstrap 5.3 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    
+    <!-- Custom Theme Styles -->
+    <link rel="stylesheet" th:href="@{/css/custom.css}">
+</head>
+<body class="bg-grid-pattern">
+
+    <!-- Sticky Navigation Bar -->
+    <nav th:fragment="navbar(activeTab)" class="navbar navbar-expand-lg navbar-custom">
+        <div class="container">
+            <!-- Brand Logo -->
+            <a class="navbar-brand navbar-brand-logo" th:href="@{/}">
+                <div class="brand-icon-box">
+                    <i class="bi bi-compass-fill"></i>
+                </div>
+                <span>CAMPUS<span style="font-weight: 300; opacity: 0.85;">FIND</span></span>
+            </a>
+
+            <!-- Mobile Toggle -->
+            <button class="navbar-toggler border-0 text-white shadow-none" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMain" aria-controls="navbarMain" aria-expanded="false" aria-label="Toggle navigation">
+                <i class="bi bi-list fs-2 text-white"></i>
+            </button>
+
+            <!-- Nav Links -->
+            <div class="collapse navbar-collapse" id="navbarMain">
+                <ul class="navbar-nav mx-auto mb-2 mb-lg-0 gap-lg-1">
+                    <li class="nav-item">
+                        <a class="nav-link nav-link-custom" th:classappend="${activeTab == 'home'} ? 'active' : ''" th:href="@{/}">
+                            <i class="bi bi-house me-1"></i> Home
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link nav-link-custom" th:classappend="${activeTab == 'browse'} ? 'active' : ''" th:href="@{/browse}">
+                            <i class="bi bi-search me-1"></i> Browse Items
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link nav-link-custom" th:classappend="${activeTab == 'report'} ? 'active' : ''" th:href="@{/report}">
+                            <i class="bi bi-plus-circle me-1"></i> Report Item
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link nav-link-custom" th:classappend="${activeTab == 'dashboard'} ? 'active' : ''" th:href="@{/dashboard}">
+                            <i class="bi bi-speedometer2 me-1"></i> Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link nav-link-custom" th:classappend="${activeTab == 'manage'} ? 'active' : ''" th:href="@{/manage}">
+                            <i class="bi bi-sliders me-1"></i> Admin Portal
+                        </a>
+                    </li>
+                </ul>
+
+                <!-- Action Buttons -->
+                <div class="d-flex align-items-center gap-2">
+                    <div class="dropdown">
+                        <button class="btn btn-stark-white dropdown-toggle d-flex align-items-center gap-2" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="bi bi-plus-lg"></i> Post Report
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end shadow-lg" style="background-color: var(--bg-surface-elevated); border: 1px solid var(--border-medium); border-radius: var(--radius-md); padding: 0.5rem;">
+                            <li>
+                                <a class="dropdown-item py-2 px-3 rounded-2 d-flex align-items-center gap-2" th:href="@{/report?type=LOST}">
+                                    <span class="badge rounded-circle p-1" style="background-color: var(--lost-ruby-bg); color: #FB7185;"><i class="bi bi-exclamation-circle-fill"></i></span>
+                                    <span>Report <strong>Lost Item</strong></span>
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item py-2 px-3 rounded-2 d-flex align-items-center gap-2" th:href="@{/report?type=FOUND}">
+                                    <span class="badge rounded-circle p-1" style="background-color: var(--found-emerald-bg); color: #34D399;"><i class="bi bi-check-circle-fill"></i></span>
+                                    <span>Report <strong>Found Item</strong></span>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Global Alert Messages -->
+    <div th:fragment="alerts" class="container mt-3">
+        <div th:if="${successMessage}" class="alert alert-cf-success alert-dismissible fade show d-flex align-items-center gap-2 shadow" role="alert">
+            <i class="bi bi-check-circle-fill fs-5"></i>
+            <div class="flex-grow-1" th:text="${successMessage}">Operation successful!</div>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        <div th:if="${errorMessage}" class="alert alert-cf-error alert-dismissible fade show d-flex align-items-center gap-2 shadow" role="alert">
+            <i class="bi bi-exclamation-triangle-fill fs-5"></i>
+            <div class="flex-grow-1" th:text="${errorMessage}">An error occurred.</div>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    </div>
+
+    <!-- Global Footer -->
+    <footer th:fragment="footer" class="footer-custom">
+        <div class="container">
+            <div class="row g-4">
+                <div class="col-lg-4">
+                    <div class="d-flex align-items-center gap-2 mb-3">
+                        <div class="brand-icon-box" style="width: 30px; height: 30px; font-size: 0.9rem;">
+                            <i class="bi bi-compass-fill"></i>
+                        </div>
+                        <h5 class="mb-0 text-white font-weight-bold">CAMPUS FIND</h5>
+                    </div>
+                    <p class="text-secondary small mb-3">
+                        A modern, high-contrast university platform connecting students, faculty, and campus security to report, catalog, and recover lost property securely.
+                    </p>
+                    <div class="d-flex gap-2">
+                        <span class="badge badge-category"><i class="bi bi-shield-check text-white me-1"></i> Verified Campus Portal</span>
+                        <span class="badge badge-category"><i class="bi bi-database-check text-white me-1"></i> Persistent Local Store</span>
+                    </div>
+                </div>
+
+                <div class="col-6 col-lg-2">
+                    <h5>Quick Navigation</h5>
+                    <a th:href="@{/}" class="footer-link">Home</a>
+                    <a th:href="@{/browse}" class="footer-link">Browse Items</a>
+                    <a th:href="@{/report}" class="footer-link">Report Item</a>
+                    <a th:href="@{/dashboard}" class="footer-link">Analytics</a>
+                    <a th:href="@{/manage}" class="footer-link">Admin Portal</a>
+                </div>
+
+                <div class="col-6 col-lg-3">
+                    <h5>Campus Zones</h5>
+                    <a th:href="@{/browse?keyword=Library}" class="footer-link"><i class="bi bi-geo-alt me-1"></i> Central Library</a>
+                    <a th:href="@{/browse?keyword=Union}" class="footer-link"><i class="bi bi-geo-alt me-1"></i> Student Union</a>
+                    <a th:href="@{/browse?keyword=Engineering}" class="footer-link"><i class="bi bi-geo-alt me-1"></i> Engineering Complex</a>
+                    <a th:href="@{/browse?keyword=Sports}" class="footer-link"><i class="bi bi-geo-alt me-1"></i> Recreation & Gym</a>
+                    <a th:href="@{/browse?keyword=Science}" class="footer-link"><i class="bi bi-geo-alt me-1"></i> Science Labs</a>
+                </div>
+
+                <div class="col-lg-3">
+                    <h5>System Architecture</h5>
+                    <p class="text-secondary small mb-2">Built with Java 17, Spring Boot 3, Thymeleaf & Bootstrap 5.</p>
+                    <div class="p-3 rounded-3" style="background: var(--bg-surface); border: 1px solid var(--border-subtle);">
+                        <div class="d-flex align-items-center justify-content-between mb-2">
+                            <span class="small text-secondary">System Status:</span>
+                            <span class="badge bg-white text-black font-weight-bold" style="font-size: 0.7rem;"><i class="bi bi-circle-fill me-1 text-success" style="font-size: 6px;"></i> Active</span>
+                        </div>
+                        <div class="small text-secondary">
+                            <div><i class="bi bi-check2 text-white me-1"></i> Embedded H2 File Store</div>
+                            <div><i class="bi bi-check2 text-white me-1"></i> Sub-millisecond JPQL Queries</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <hr class="my-4" style="border-color: var(--border-subtle);">
+
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-center gap-2 small text-secondary">
+                <div>&copy; 2026 Campus Find – Smart Campus Lost &amp; Found System. University Capstone Project.</div>
+                <div class="text-white-50">Stark Monochrome Edition</div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts Fragment -->
+    <div th:fragment="scripts">
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+        <script th:src="@{/js/app.js}"></script>
+    </div>
+</body>
+</html>

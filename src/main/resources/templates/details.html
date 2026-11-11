@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: header('Campus Find – Item Details #' + ${item.id})}"></head>
+<body>
+
+    <!-- Navigation -->
+    <div th:replace="~{fragments/layout :: navbar('browse')}"></div>
+
+    <!-- Alert Messages -->
+    <div th:replace="~{fragments/layout :: alerts}"></div>
+
+    <main class="container py-4">
+        <!-- Back Navigation & Action Bar -->
+        <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-2">
+            <a th:href="@{/browse}" class="btn btn-cf-outline btn-sm d-flex align-items-center gap-1">
+                <i class="bi bi-arrow-left"></i> Back to Browse
+            </a>
+
+            <div class="d-flex align-items-center gap-2">
+                <!-- Status Toggle Button -->
+                <form th:action="@{'/items/' + ${item.id} + '/toggle-status'}" method="post" class="d-inline">
+                    <input type="hidden" name="redirectSource" value="details">
+                    <button th:if="${item.isPending()}" type="submit" class="btn btn-found-emerald btn-sm d-flex align-items-center gap-1">
+                        <i class="bi bi-check-circle-fill"></i> Mark as Recovered
+                    </button>
+                    <button th:if="${item.isRecovered()}" type="submit" class="btn btn-cf-outline btn-sm d-flex align-items-center gap-1">
+                        <i class="bi bi-arrow-counterclockwise"></i> Reopen (Mark Pending)
+                    </button>
+                </form>
+
+                <!-- Edit Report -->
+                <a th:href="@{'/items/' + ${item.id} + '/edit'}" class="btn btn-cf-outline btn-sm d-flex align-items-center gap-1">
+                    <i class="bi bi-pencil-square"></i> Edit
+                </a>
+
+                <!-- Delete Report -->
+                <form th:action="@{'/items/' + ${item.id} + '/delete'}" method="post" class="d-inline">
+                    <input type="hidden" name="redirectSource" value="browse">
+                    <button type="submit" class="btn btn-outline-danger btn-sm d-flex align-items-center gap-1 btn-delete-confirm"
+                            th:data-item-name="${item.name}">
+                        <i class="bi bi-trash"></i> Delete
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <div class="row g-4">
+            <!-- Left Column: Primary Details -->
+            <div class="col-lg-8">
+                <div class="cf-card overflow-hidden mb-4">
+                    <!-- Hero Banner for Item -->
+                    <div class="item-card-header" style="height: 200px;" th:classappend="${item.isLost()} ? 'header-lost' : 'header-found'">
+                        <i class="bi item-card-icon" style="font-size: 5rem;"
+                           th:classappend="${item.getCategoryIcon()}" 
+                           th:style="${item.isLost()} ? 'color: #FB7185;' : 'color: #34D399;'"></i>
+                    </div>
+
+                    <div class="p-4 p-md-5">
+                        <!-- Badges Header -->
+                        <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
+                            <div class="d-flex align-items-center gap-2">
+                                <span th:if="${item.isLost()}" class="badge-lost fs-6 px-3 py-1">
+                                    <i class="bi bi-exclamation-circle-fill"></i> LOST REPORT
+                                </span>
+                                <span th:if="${item.isFound()}" class="badge-found fs-6 px-3 py-1">
+                                    <i class="bi bi-check-circle-fill"></i> FOUND REPORT
+                                </span>
+
+                                <span class="badge-category fs-6 px-3 py-1" th:text="${item.category}">Electronics</span>
+                            </div>
+
+                            <div>
+                                <span th:if="${item.isRecovered()}" class="badge-recovered fs-6 px-3 py-1">
+                                    <i class="bi bi-check-all"></i> RECOVERED
+                                </span>
+                                <span th:if="${item.isPending()}" class="badge-pending fs-6 px-3 py-1">
+                                    <i class="bi bi-clock-history"></i> PENDING RESOLUTION
+                                </span>
+                            </div>
+                        </div>
+
+                        <!-- Item Title -->
+                        <h2 class="display-6 fw-bold text-white mb-3" th:text="${item.name}">Space Black MacBook Pro</h2>
+
+                        <!-- Metadata Badges -->
+                        <div class="d-flex flex-wrap gap-3 mb-4 text-secondary small">
+                            <div>
+                                <i class="bi bi-upc-scan text-white me-1"></i>
+                                Report Tracking ID: <strong class="text-white" th:text="'#CF-' + ${item.id}">#CF-101</strong>
+                            </div>
+                            <div>
+                                <i class="bi bi-calendar-event text-white me-1"></i>
+                                Reported On: <strong class="text-white" th:text="${item.dateReported}">2026-10-31</strong>
+                            </div>
+                            <div>
+                                <i class="bi bi-geo-alt-fill text-white me-1"></i>
+                                Campus Zone: <strong class="text-white" th:text="${item.location}">Engineering 302</strong>
+                            </div>
+                        </div>
+
+                        <hr style="border-color: var(--border-subtle);">
+
+                        <!-- Description -->
+                        <div class="mb-4">
+                            <h5 class="fw-bold text-white mb-2">Item Description &amp; Identifying Details</h5>
+                            <div class="p-3 rounded-3" style="background-color: var(--bg-surface); border: 1px solid var(--border-subtle);">
+                                <p class="text-white mb-0" style="white-space: pre-wrap; line-height: 1.7;" th:text="${item.description}">
+                                    Item description details...
+                                </p>
+                            </div>
+                        </div>
+
+                        <!-- Location Spotlight -->
+                        <div class="mb-4">
+                            <h5 class="fw-bold text-white mb-2">Location Information</h5>
+                            <div class="p-3 rounded-3 d-flex align-items-center gap-3" style="background-color: var(--bg-surface); border: 1px solid var(--border-subtle);">
+                                <div class="rounded-circle p-2 d-flex align-items-center justify-content-center" 
+                                     style="width: 44px; height: 44px; background: rgba(255, 255, 255, 0.08); color: #FFFFFF; border: 1px solid var(--border-medium);">
+                                    <i class="bi bi-pin-map-fill fs-5"></i>
+                                </div>
+                                <div>
+                                    <div class="text-white fw-bold" th:text="${item.location}">Central Library - 2nd Floor</div>
+                                    <div class="small text-secondary">Reported Campus Facility / Zone</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column: Contact & Safe Claiming Instructions -->
+            <div class="col-lg-4">
+                <!-- Contact Card -->
+                <div class="cf-card p-4 mb-4">
+                    <h5 class="fw-bold text-white mb-3 d-flex align-items-center gap-2">
+                        <i class="bi bi-person-badge text-white"></i> Contact &amp; Claiming
+                    </h5>
+
+                    <div th:if="${item.contact != null and !item.contact.trim().isEmpty()}" class="mb-3">
+                        <div class="small text-secondary mb-1">Reporter Contact Details:</div>
+                        <div class="p-3 rounded-3" style="background-color: var(--bg-surface); border: 1px solid var(--border-subtle);">
+                            <div class="fw-bold text-white" th:text="${item.contact}">student@campus.edu</div>
+                        </div>
+                    </div>
+
+                    <div th:if="${item.contact == null or item.contact.trim().isEmpty()}" class="mb-3">
+                        <div class="p-3 rounded-3 text-secondary small" style="background-color: var(--bg-surface); border: 1px solid var(--border-subtle);">
+                            No direct personal contact was published. Please contact Campus Security or check with the local facility desk.
+                        </div>
+                    </div>
+
+                    <div class="small text-secondary">
+                        <i class="bi bi-shield-lock me-1 text-white"></i>
+                        Please bring valid campus identification when meeting to reclaim items.
+                    </div>
+                </div>
+
+                <!-- Handover Guidelines Card -->
+                <div class="cf-card p-4 mb-4">
+                    <h6 class="fw-bold text-white mb-2 d-flex align-items-center gap-2">
+                        <i class="bi bi-building-check text-white"></i> Central Handover Hubs
+                    </h6>
+                    <p class="small text-secondary mb-3">
+                        If you cannot reach the owner directly, items may be deposited at official university lost &amp; found collection desks:
+                    </p>
+                    <ul class="small text-secondary ps-3 mb-0">
+                        <li class="mb-1"><strong class="text-white">Campus Police &amp; Safety</strong>: Bldg 12, Room 100</li>
+                        <li class="mb-1"><strong class="text-white">Student Union Desk</strong>: Level 1 Lobby</li>
+                        <li><strong class="text-white">Central Library</strong>: Circulation Counter</li>
+                    </ul>
+                </div>
+
+                <!-- Print / Share -->
+                <div class="text-center">
+                    <button class="btn btn-cf-outline w-100 py-2" onclick="window.print()">
+                        <i class="bi bi-printer me-1"></i> Print Report Slip
+                    </button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <div th:replace="~{fragments/layout :: footer}"></div>
+
+    <!-- Scripts -->
+    <div th:replace="~{fragments/layout :: scripts}"></div>
+</body>
+</html>

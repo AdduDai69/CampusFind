@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: header('Campus Find – Dashboard &amp; Analytics')}"></head>
+<body>
+
+    <!-- Navigation -->
+    <div th:replace="~{fragments/layout :: navbar('dashboard')}"></div>
+
+    <!-- Alert Messages -->
+    <div th:replace="~{fragments/layout :: alerts}"></div>
+
+    <main class="container py-4">
+        <!-- Header -->
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
+            <div>
+                <span class="text-uppercase text-secondary fw-bold small tracking-wider">Metrics &amp; Insights</span>
+                <h1 class="h2 fw-bold text-white mb-1">Lost &amp; Found Analytics Dashboard</h1>
+                <p class="text-secondary mb-0">Real-time statistics, recovery metrics, and campus item tracking data.</p>
+            </div>
+            <div class="d-flex gap-2">
+                <a th:href="@{/report}" class="btn btn-stark-white d-flex align-items-center gap-2">
+                    <i class="bi bi-plus-lg"></i>
+                    <span>New Report</span>
+                </a>
+                <a th:href="@{/manage}" class="btn btn-cf-outline d-flex align-items-center gap-2">
+                    <i class="bi bi-sliders"></i>
+                    <span>Admin Table</span>
+                </a>
+            </div>
+        </div>
+
+        <!-- 4 Key Metric Cards -->
+        <div class="row g-3 mb-4">
+            <!-- Total Reports -->
+            <div class="col-sm-6 col-lg-3">
+                <div class="stat-card">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span class="stat-label">Total Reports</span>
+                        <div class="stat-icon mb-0">
+                            <i class="bi bi-database"></i>
+                        </div>
+                    </div>
+                    <div class="stat-value" th:text="${stats.total}">12</div>
+                    <div class="small text-secondary mt-1">All time logged campus items</div>
+                </div>
+            </div>
+
+            <!-- Lost Items -->
+            <div class="col-sm-6 col-lg-3">
+                <div class="stat-card">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span class="stat-label">Lost Items</span>
+                        <div class="stat-icon mb-0" style="background: var(--lost-ruby-bg); color: #FB7185; border-color: rgba(244, 63, 94, 0.3);">
+                            <i class="bi bi-exclamation-octagon"></i>
+                        </div>
+                    </div>
+                    <div class="stat-value" style="color: #FB7185;" th:text="${stats.lost}">6</div>
+                    <div class="small text-secondary mt-1">Belongings actively missing</div>
+                </div>
+            </div>
+
+            <!-- Found Items -->
+            <div class="col-sm-6 col-lg-3">
+                <div class="stat-card">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span class="stat-label">Found Items</span>
+                        <div class="stat-icon mb-0" style="background: var(--found-emerald-bg); color: #34D399; border-color: rgba(16, 185, 129, 0.3);">
+                            <i class="bi bi-bag-check"></i>
+                        </div>
+                    </div>
+                    <div class="stat-value" style="color: #34D399;" th:text="${stats.found}">6</div>
+                    <div class="small text-secondary mt-1">Turned in across facilities</div>
+                </div>
+            </div>
+
+            <!-- Recovery Rate & Count -->
+            <div class="col-sm-6 col-lg-3">
+                <div class="stat-card">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span class="stat-label">Recovery Rate</span>
+                        <div class="stat-icon mb-0">
+                            <i class="bi bi-percent"></i>
+                        </div>
+                    </div>
+                    <div class="stat-value text-white" th:text="${stats.recoveryRate} + '%'">25.0%</div>
+                    <div class="small text-secondary mt-1">
+                        <span class="text-white fw-bold" th:text="${stats.recovered}">3</span> of <span th:text="${stats.total}">12</span> successfully recovered
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recovery Progress Bar -->
+        <div class="cf-card p-3 mb-4">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <span class="small text-secondary font-weight-bold text-uppercase">Campus Resolution Efficiency</span>
+                <span class="badge badge-recovered">
+                    <i class="bi bi-arrow-up-right me-1"></i> <span th:text="${stats.recoveryRate}">25.0</span>% Resolved
+                </span>
+            </div>
+            <div class="progress" style="height: 8px; background-color: var(--bg-surface); border-radius: 6px; overflow: hidden;">
+                <div class="progress-bar" role="progressbar" 
+                     th:style="'width: ' + ${stats.recoveryPercentage} + '%; background: #FFFFFF; box-shadow: 0 0 12px rgba(255, 255, 255, 0.5);'"
+                     th:aria-valuenow="${stats.recoveryPercentage}" aria-valuemin="0" aria-valuemax="100">
+                </div>
+            </div>
+        </div>
+
+        <!-- Visual Charts Section -->
+        <div class="row g-4 mb-4">
+            <!-- Doughnut Chart: Status Breakdown -->
+            <div class="col-lg-5">
+                <div class="cf-card p-4 h-100 d-flex flex-column">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 class="fw-bold text-white mb-0">Report Status Distribution</h5>
+                        <i class="bi bi-pie-chart text-secondary"></i>
+                    </div>
+                    <p class="text-secondary small mb-3">Breakdown of items by report status.</p>
+                    
+                    <div class="position-relative flex-grow-1" style="min-height: 250px;">
+                        <canvas id="statusPieChart" 
+                                th:data-lost="${stats.lost}" 
+                                th:data-found="${stats.found}" 
+                                th:data-recovered="${stats.recovered}">
+                        </canvas>
+                    </div>
+
+                    <div class="row g-2 text-center mt-3 pt-3 border-top" style="border-color: var(--border-subtle) !important;">
+                        <div class="col-4">
+                            <div class="small text-secondary">Lost</div>
+                            <div class="fw-bold" style="color: #FB7185;" th:text="${stats.lost}">6</div>
+                        </div>
+                        <div class="col-4">
+                            <div class="small text-secondary">Found</div>
+                            <div class="fw-bold text-white" th:text="${stats.found}">6</div>
+                        </div>
+                        <div class="col-4">
+                            <div class="small text-secondary">Recovered</div>
+                            <div class="fw-bold" style="color: #34D399;" th:text="${stats.recovered}">3</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bar Chart: Category-wise statistics -->
+            <div class="col-lg-7">
+                <div class="cf-card p-4 h-100 d-flex flex-column">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 class="fw-bold text-white mb-0">Reports by Category</h5>
+                        <i class="bi bi-bar-chart-line text-secondary"></i>
+                    </div>
+                    <p class="text-secondary small mb-3">Frequency of lost and found reports grouped by item category.</p>
+                    
+                    <div class="position-relative flex-grow-1" style="min-height: 250px;">
+                        <canvas id="categoryBarChart" 
+                                th:attr="data-categories=${@dashboardController.getStatsApi().get('categoryStats').toString() != null ? '{' + #strings.listJoin(stats.categoryStats.entrySet().![ '&quot;' + key + '&quot;:' + value ], ',') + '}' : '{}'}">
+                        </canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Category Grid & Quick Counts -->
+        <div class="cf-card p-4 mb-4">
+            <h5 class="fw-bold text-white mb-3">Category Breakdown Details</h5>
+            <div class="row g-3">
+                <div th:each="entry : ${stats.categoryStats}" class="col-6 col-md-4 col-lg-3">
+                    <a th:href="@{/browse(category=${entry.key})}" class="text-decoration-none">
+                        <div class="p-3 rounded-3 d-flex align-items-center justify-content-between" 
+                             style="background-color: var(--bg-surface); border: 1px solid var(--border-subtle); transition: all 0.2s ease;">
+                            <div>
+                                <div class="text-white fw-bold small" th:text="${entry.key}">Electronics</div>
+                                <div class="text-secondary small">Filter items</div>
+                            </div>
+                            <span class="badge rounded-pill bg-white text-black font-weight-bold" th:text="${entry.value}">4</span>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Activity Feed Table -->
+        <div class="cf-card p-4">
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-3 gap-2">
+                <div>
+                    <h5 class="fw-bold text-white mb-1">Recent Campus Reports</h5>
+                    <p class="text-secondary small mb-0">The 10 most recent lost and found entries recorded on system</p>
+                </div>
+                <a th:href="@{/browse}" class="btn btn-cf-outline btn-sm">View All in Browse</a>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table cf-table mb-0">
+                    <thead>
+                        <tr>
+                            <th>Item Name</th>
+                            <th>Category</th>
+                            <th>Type</th>
+                            <th>Location</th>
+                            <th>Reported Date</th>
+                            <th>Status</th>
+                            <th class="text-end">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="item : ${recentItems}">
+                            <td>
+                                <a th:href="@{'/items/' + ${item.id}}" class="fw-semibold text-white text-decoration-none">
+                                    <i class="bi me-1 text-secondary" th:classappend="${item.getCategoryIcon()}"></i>
+                                    <span th:text="${item.name}">Item Name</span>
+                                </a>
+                            </td>
+                            <td>
+                                <span class="badge-category" th:text="${item.category}">Electronics</span>
+                            </td>
+                            <td>
+                                <span th:if="${item.isLost()}" class="badge-lost">LOST</span>
+                                <span th:if="${item.isFound()}" class="badge-found">FOUND</span>
+                            </td>
+                            <td class="text-secondary small">
+                                <i class="bi bi-geo-alt me-1 text-white"></i>
+                                <span th:text="${item.location}">Location</span>
+                            </td>
+                            <td class="text-secondary small" th:text="${item.dateReported}">2026-10-31</td>
+                            <td>
+                                <span th:if="${item.isRecovered()}" class="badge-recovered">RECOVERED</span>
+                                <span th:if="${item.isPending()}" class="badge-pending">PENDING</span>
+                            </td>
+                            <td class="text-end">
+                                <a th:href="@{'/items/' + ${item.id}}" class="btn btn-cf-outline btn-sm py-1 px-2">
+                                    <i class="bi bi-arrow-up-right"></i>
+                                </a>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <div th:replace="~{fragments/layout :: footer}"></div>
+
+    <!-- Scripts -->
+    <div th:replace="~{fragments/layout :: scripts}"></div>
+</body>
+</html>

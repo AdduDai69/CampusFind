@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: header('Campus Find – Smart Campus Lost &amp; Found')}"></head>
+<body>
+
+    <!-- Navigation -->
+    <div th:replace="~{fragments/layout :: navbar('home')}"></div>
+
+    <!-- Alert Messages -->
+    <div th:replace="~{fragments/layout :: alerts}"></div>
+
+    <main>
+        <!-- Hero Section with Spotlight Glow & Grid Pattern -->
+        <section class="hero-section text-center position-relative">
+            <div class="hero-glow-spotlight"></div>
+
+            <div class="container position-relative z-1">
+                <div class="hero-badge animate-fade-in-up">
+                    <i class="bi bi-shield-check"></i> Official University Lost &amp; Found Portal
+                </div>
+                
+                <h1 class="hero-title animate-fade-in-up delay-1">
+                    Lost Something on Campus?<br>Let's Find It.
+                </h1>
+                
+                <p class="hero-subtitle animate-fade-in-up delay-2">
+                    A centralized, intelligent network for reporting, cataloging, and recovering missing belongings across lecture halls, libraries, dining areas, and campus grounds.
+                </p>
+
+                <!-- Primary Action Buttons -->
+                <div class="d-flex flex-wrap justify-content-center gap-3 mb-4 animate-fade-in-up delay-3">
+                    <a th:href="@{/report?type=LOST}" class="btn btn-lost-crimson px-4 py-3">
+                        <i class="bi bi-exclamation-triangle-fill fs-5"></i>
+                        <span class="fs-6">Report Lost Item</span>
+                    </a>
+                    <a th:href="@{/report?type=FOUND}" class="btn btn-found-emerald px-4 py-3">
+                        <i class="bi bi-check-circle-fill fs-5"></i>
+                        <span class="fs-6">Report Found Item</span>
+                    </a>
+                    <a th:href="@{/browse}" class="btn btn-stark-white px-4 py-3">
+                        <i class="bi bi-grid-3x3-gap fs-5"></i>
+                        <span class="fs-6">Browse All Reports</span>
+                    </a>
+                </div>
+
+                <!-- Fast Search Bar -->
+                <div class="row justify-content-center mt-4 animate-fade-in-up delay-4">
+                    <div class="col-lg-8">
+                        <div class="p-2 rounded-4" style="background: rgba(14, 16, 21, 0.85); border: 1px solid var(--border-medium); backdrop-filter: blur(16px); box-shadow: var(--shadow-elevated);">
+                            <form th:action="@{/browse}" method="get" class="d-flex flex-column flex-sm-row gap-2">
+                                <div class="input-group">
+                                    <span class="input-group-text bg-transparent border-0 text-secondary ps-3">
+                                        <i class="bi bi-search text-white"></i>
+                                    </span>
+                                    <input type="text" name="keyword" class="form-control bg-transparent border-0 text-white shadow-none" placeholder="Search by item name (e.g., MacBook, Keys, ID Card) or campus facility...">
+                                </div>
+                                <button type="submit" class="btn btn-stark-white px-4 text-nowrap">
+                                    <span>Search Campus</span>
+                                    <i class="bi bi-arrow-right ms-1"></i>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Location Pills -->
+                <div class="d-flex flex-wrap justify-content-center gap-2 mt-3 small text-secondary">
+                    <span class="text-secondary me-1">Popular zones:</span>
+                    <a th:href="@{/browse(keyword='Library')}" class="badge bg-transparent text-secondary border border-secondary border-opacity-25 text-decoration-none py-1 px-2">Library</a>
+                    <a th:href="@{/browse(keyword='Cafeteria')}" class="badge bg-transparent text-secondary border border-secondary border-opacity-25 text-decoration-none py-1 px-2">Cafeteria</a>
+                    <a th:href="@{/browse(keyword='Engineering')}" class="badge bg-transparent text-secondary border border-secondary border-opacity-25 text-decoration-none py-1 px-2">Engineering Hall</a>
+                    <a th:href="@{/browse(keyword='Gym')}" class="badge bg-transparent text-secondary border border-secondary border-opacity-25 text-decoration-none py-1 px-2">Sports Center</a>
+                    <a th:href="@{/browse(keyword='Shuttle')}" class="badge bg-transparent text-secondary border border-secondary border-opacity-25 text-decoration-none py-1 px-2">Transit Shuttle</a>
+                </div>
+            </div>
+        </section>
+
+        <!-- Live Statistics Counter -->
+        <section class="container py-4">
+            <div class="row g-3">
+                <div class="col-6 col-lg-3">
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="bi bi-collection-fill"></i>
+                        </div>
+                        <div class="stat-value" th:text="${stats.total}">12</div>
+                        <div class="stat-label">Total Reports</div>
+                    </div>
+                </div>
+                <div class="col-6 col-lg-3">
+                    <div class="stat-card">
+                        <div class="stat-icon" style="background: var(--lost-ruby-bg); color: #FB7185; border-color: rgba(244, 63, 94, 0.3);">
+                            <i class="bi bi-question-circle-fill"></i>
+                        </div>
+                        <div class="stat-value" style="color: #FB7185;" th:text="${stats.lost}">6</div>
+                        <div class="stat-label">Lost Items</div>
+                    </div>
+                </div>
+                <div class="col-6 col-lg-3">
+                    <div class="stat-card">
+                        <div class="stat-icon" style="background: var(--found-emerald-bg); color: #34D399; border-color: rgba(16, 185, 129, 0.3);">
+                            <i class="bi bi-compass-fill"></i>
+                        </div>
+                        <div class="stat-value" style="color: #34D399;" th:text="${stats.found}">6</div>
+                        <div class="stat-label">Found Items</div>
+                    </div>
+                </div>
+                <div class="col-6 col-lg-3">
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="bi bi-patch-check-fill"></i>
+                        </div>
+                        <div class="stat-value text-white" th:text="${stats.recovered}">3</div>
+                        <div class="stat-label">Recovered (<span th:text="${stats.recoveryRate} + '%'">25.0%</span>)</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Recently Reported Items -->
+        <section class="container py-5">
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-end mb-4">
+                <div>
+                    <span class="text-uppercase text-secondary fw-bold small tracking-wider">Latest Activity</span>
+                    <h2 class="h3 fw-bold text-white mb-1">Recently Reported Items</h2>
+                    <p class="text-secondary mb-0">Browse latest missing or handed-over items on campus</p>
+                </div>
+                <a th:href="@{/browse}" class="btn btn-cf-outline mt-3 mt-md-0 d-inline-flex align-items-center gap-2">
+                    <span>View All Items</span>
+                    <i class="bi bi-arrow-right"></i>
+                </a>
+            </div>
+
+            <div class="row g-4">
+                <div th:each="item : ${recentItems}" class="col-md-6 col-lg-4">
+                    <div class="cf-card cf-card-hover h-100 d-flex flex-column">
+                        <!-- Card Header graphic -->
+                        <div class="item-card-header" th:classappend="${item.isLost()} ? 'header-lost' : 'header-found'">
+                            <i class="bi item-card-icon" 
+                               th:classappend="${item.getCategoryIcon()}" 
+                               th:style="${item.isLost()} ? 'color: #FB7185;' : 'color: #34D399;'"></i>
+                            
+                            <!-- Badges in corners -->
+                            <div class="position-absolute top-0 start-0 m-3">
+                                <span th:if="${item.isLost()}" class="badge-lost">
+                                    <i class="bi bi-exclamation-circle-fill"></i> Lost
+                                </span>
+                                <span th:if="${item.isFound()}" class="badge-found">
+                                    <i class="bi bi-check-circle-fill"></i> Found
+                                </span>
+                            </div>
+
+                            <div class="position-absolute top-0 end-0 m-3">
+                                <span th:if="${item.isRecovered()}" class="badge-recovered">
+                                    <i class="bi bi-check-all"></i> Recovered
+                                </span>
+                                <span th:if="${item.isPending()}" class="badge-pending">
+                                    <i class="bi bi-clock-history"></i> Pending
+                                </span>
+                            </div>
+                        </div>
+
+                        <!-- Card Content -->
+                        <div class="cf-card-inner flex-grow-1 d-flex flex-column">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span class="badge-category" th:text="${item.category}">Electronics</span>
+                                <span class="text-secondary small">
+                                    <i class="bi bi-calendar3 me-1"></i>
+                                    <span th:text="${item.dateReported}">2026-10-30</span>
+                                </span>
+                            </div>
+
+                            <h5 class="fw-bold text-white mb-2" th:text="${item.name}">Item Name</h5>
+                            
+                            <p class="text-secondary small flex-grow-1 mb-3" 
+                               style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;"
+                               th:text="${item.description}">
+                                Item description details...
+                            </p>
+
+                            <div class="p-2 rounded-3 mb-3" style="background-color: var(--bg-surface); border: 1px solid var(--border-subtle);">
+                                <div class="text-secondary small text-truncate">
+                                    <i class="bi bi-geo-alt-fill text-white me-1"></i>
+                                    <span th:text="${item.location}">Campus Library 2nd Floor</span>
+                                </div>
+                            </div>
+
+                            <a th:href="@{'/items/' + ${item.id}}" class="btn btn-cf-outline w-100 text-center py-2">
+                                <i class="bi bi-arrow-up-right me-1"></i> View Details
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- How It Works Section -->
+        <section class="py-5" style="background-color: #030406; border-top: 1px solid var(--border-subtle); border-bottom: 1px solid var(--border-subtle);">
+            <div class="container py-3">
+                <div class="text-center max-w-xl mx-auto mb-5">
+                    <span class="text-uppercase text-secondary fw-bold small tracking-wider">Fast &amp; Simple</span>
+                    <h2 class="h2 fw-bold text-white mt-1">How Campus Find Works</h2>
+                    <p class="text-secondary">Three straightforward steps to reconnect students with their missing belongings.</p>
+                </div>
+
+                <div class="row g-4">
+                    <div class="col-md-4">
+                        <div class="cf-card h-100 p-4">
+                            <div class="step-number">1</div>
+                            <h4 class="fw-bold text-white mb-2">Report in Seconds</h4>
+                            <p class="text-secondary small mb-0">
+                                Submit a report for any item you've misplaced or discovered on campus. Specify the building, date, distinctive marks, and how to reach you.
+                            </p>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="cf-card h-100 p-4">
+                            <div class="step-number">2</div>
+                            <h4 class="fw-bold text-white mb-2">Instant Search &amp; Match</h4>
+                            <p class="text-secondary small mb-0">
+                                Filter by category, campus zone, or report type. Our real-time query engine searches descriptions to locate matching belongings immediately.
+                            </p>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="cf-card h-100 p-4">
+                            <div class="step-number">3</div>
+                            <h4 class="fw-bold text-white mb-2">Claim &amp; Recover Safely</h4>
+                            <p class="text-secondary small mb-0">
+                                Verify ownership with the finder or campus lost &amp; found desk (using serial numbers or student ID). Mark the report as recovered with one click.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Bottom Call to Action Banner -->
+        <section class="container py-5">
+            <div class="p-4 p-md-5 rounded-4 text-center position-relative overflow-hidden" 
+                 style="background: radial-gradient(circle at 50% 0%, rgba(255, 255, 255, 0.08) 0%, #0E1015 100%); border: 1px solid var(--border-medium); box-shadow: var(--shadow-card);">
+                
+                <div class="position-relative z-1 max-w-2xl mx-auto">
+                    <h3 class="display-6 fw-bold text-white mb-3">Found something that isn't yours?</h3>
+                    <p class="text-secondary mb-4">
+                        Help a fellow student or professor retrieve their valuables. Turn lost anxiety into campus relief with a 60-second submission.
+                    </p>
+                    <div class="d-flex flex-wrap justify-content-center gap-3">
+                        <a th:href="@{/report?type=FOUND}" class="btn btn-found-emerald px-4 py-2">
+                            <i class="bi bi-hand-thumbs-up-fill me-1"></i> Report Found Item Now
+                        </a>
+                        <a th:href="@{/dashboard}" class="btn btn-cf-outline px-4 py-2">
+                            <i class="bi bi-speedometer2 me-1"></i> View Campus Analytics
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <div th:replace="~{fragments/layout :: footer}"></div>
+
+    <!-- Scripts -->
+    <div th:replace="~{fragments/layout :: scripts}"></div>
+</body>
+</html>

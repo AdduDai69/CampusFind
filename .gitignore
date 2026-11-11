@@ -1,0 +1,12 @@
+target/
+.m2/
+data/
+*.db
+*.log
+*.lock
+*.trace.db
+.idea/
+*.iml
+.vscode/
+.DS_Store
+Thumbs.db

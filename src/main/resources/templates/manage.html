@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: header('Campus Find – Manage Reports (Admin Demo)')}"></head>
+<body>
+
+    <!-- Navigation -->
+    <div th:replace="~{fragments/layout :: navbar('manage')}"></div>
+
+    <!-- Alert Messages -->
+    <div th:replace="~{fragments/layout :: alerts}"></div>
+
+    <main class="container py-4">
+        <!-- Demo Admin Notice Banner -->
+        <div class="p-3 rounded-4 mb-4 d-flex align-items-center justify-content-between" 
+             style="background: rgba(255, 255, 255, 0.05); border: 1px solid var(--border-medium);">
+            <div class="d-flex align-items-center gap-3">
+                <div class="rounded-circle p-2 d-flex align-items-center justify-content-center" 
+                     style="width: 40px; height: 40px; background: rgba(255, 255, 255, 0.1); color: #FFFFFF;">
+                    <i class="bi bi-shield-lock-fill fs-5"></i>
+                </div>
+                <div>
+                    <strong class="text-white">Demonstration Administrator Portal</strong>
+                    <div class="small text-secondary">
+                        For academic evaluation purposes, access to this administrative report management panel is open without multi-tier authentication.
+                    </div>
+                </div>
+            </div>
+            <a th:href="@{/report}" class="btn btn-stark-white btn-sm d-none d-md-flex align-items-center gap-1">
+                <i class="bi bi-plus-lg"></i> Add New Item
+            </a>
+        </div>
+
+        <!-- Management Page Header -->
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
+            <div>
+                <span class="text-uppercase text-secondary fw-bold small tracking-wider">Report Management</span>
+                <h1 class="h2 fw-bold text-white mb-1">Campus Reports Administration</h1>
+                <p class="text-secondary mb-0">Review, update status, edit, or purge lost &amp; found records in the persistent database.</p>
+            </div>
+            <div class="d-flex align-items-center gap-2">
+                <a th:href="@{/dashboard}" class="btn btn-cf-outline btn-sm">
+                    <i class="bi bi-speedometer2 me-1"></i> Dashboard
+                </a>
+                <a th:href="@{/h2-console}" target="_blank" class="btn btn-cf-outline btn-sm text-secondary">
+                    <i class="bi bi-hdd-network me-1"></i> H2 DB Console
+                </a>
+            </div>
+        </div>
+
+        <!-- Search & Filter Controls -->
+        <div class="cf-card p-3 mb-4">
+            <form th:action="@{/manage}" method="get" class="row g-2 align-items-center">
+                <div class="col-md-4">
+                    <div class="input-group">
+                        <span class="input-group-text bg-transparent border-0 text-white ps-3">
+                            <i class="bi bi-search"></i>
+                        </span>
+                        <input type="text" name="keyword" th:value="${keyword}" class="form-control cf-input py-1" 
+                               placeholder="Filter by keyword or location...">
+                    </div>
+                </div>
+
+                <div class="col-6 col-md-2">
+                    <select name="type" class="form-select cf-select py-1" onchange="this.form.submit()">
+                        <option value="ALL" th:selected="${selectedType == 'ALL'}">All Types</option>
+                        <option value="LOST" th:selected="${selectedType == 'LOST'}">LOST</option>
+                        <option value="FOUND" th:selected="${selectedType == 'FOUND'}">FOUND</option>
+                    </select>
+                </div>
+
+                <div class="col-6 col-md-3">
+                    <select name="category" class="form-select cf-select py-1" onchange="this.form.submit()">
+                        <option value="ALL" th:selected="${selectedCategory == 'ALL'}">All Categories</option>
+                        <option th:each="cat : ${categories}" th:value="${cat}" th:text="${cat}" th:selected="${selectedCategory == cat}">Category</option>
+                    </select>
+                </div>
+
+                <div class="col-6 col-md-2">
+                    <select name="status" class="form-select cf-select py-1" onchange="this.form.submit()">
+                        <option value="ALL" th:selected="${selectedStatus == 'ALL'}">All Statuses</option>
+                        <option value="PENDING" th:selected="${selectedStatus == 'PENDING'}">PENDING</option>
+                        <option value="RECOVERED" th:selected="${selectedStatus == 'RECOVERED'}">RECOVERED</option>
+                    </select>
+                </div>
+
+                <div class="col-6 col-md-1 d-flex gap-1">
+                    <button type="submit" class="btn btn-stark-white py-1 px-2 w-100" title="Filter">
+                        <i class="bi bi-funnel"></i>
+                    </button>
+                    <a th:href="@{/manage}" class="btn btn-cf-outline py-1 px-2" title="Reset">
+                        <i class="bi bi-arrow-counterclockwise"></i>
+                    </a>
+                </div>
+            </form>
+        </div>
+
+        <!-- Management Table Card -->
+        <div class="cf-card p-4">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <div class="small text-secondary">
+                    Total Records Listed: <strong class="text-white" th:text="${resultCount}">12</strong>
+                </div>
+                <div class="small text-secondary">
+                    <i class="bi bi-info-circle me-1"></i> Click status toggle to switch resolution state
+                </div>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table cf-table mb-0">
+                    <thead>
+                        <tr>
+                            <th style="width: 70px;">ID</th>
+                            <th>Item Name &amp; Description</th>
+                            <th>Category</th>
+                            <th>Type</th>
+                            <th>Location</th>
+                            <th>Date</th>
+                            <th>Status Toggle</th>
+                            <th class="text-end" style="min-width: 150px;">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:if="${#lists.isEmpty(items)}">
+                            <td colspan="8" class="text-center py-5 text-secondary">
+                                <i class="bi bi-inbox fs-2 d-block mb-2"></i>
+                                No records match the specified filters.
+                            </td>
+                        </tr>
+                        <tr th:each="item : ${items}">
+                            <!-- ID -->
+                            <td class="text-secondary fw-bold" th:text="'#' + ${item.id}">#1</td>
+                            
+                            <!-- Name & preview -->
+                            <td>
+                                <a th:href="@{'/items/' + ${item.id}}" class="text-white fw-bold text-decoration-none">
+                                    <span th:text="${item.name}">MacBook Pro</span>
+                                </a>
+                                <div class="text-secondary small text-truncate" style="max-width: 250px;" th:text="${item.description}">
+                                    Item description preview
+                                </div>
+                            </td>
+
+                            <!-- Category -->
+                            <td>
+                                <span class="badge-category" th:text="${item.category}">Electronics</span>
+                            </td>
+
+                            <!-- Type -->
+                            <td>
+                                <span th:if="${item.isLost()}" class="badge-lost">LOST</span>
+                                <span th:if="${item.isFound()}" class="badge-found">FOUND</span>
+                            </td>
+
+                            <!-- Location -->
+                            <td class="text-secondary small">
+                                <i class="bi bi-geo-alt me-1 text-white"></i>
+                                <span th:text="${item.location}">Location</span>
+                            </td>
+
+                            <!-- Date -->
+                            <td class="text-secondary small" th:text="${item.dateReported}">2026-10-31</td>
+
+                            <!-- Status Toggle -->
+                            <td>
+                                <form th:action="@{'/items/' + ${item.id} + '/toggle-status'}" method="post" class="d-inline">
+                                    <input type="hidden" name="redirectSource" value="manage">
+                                    <button th:if="${item.isPending()}" type="submit" 
+                                            class="badge-pending border-0 bg-transparent py-1 px-2" 
+                                            title="Click to mark as RECOVERED" style="cursor: pointer;">
+                                        <i class="bi bi-clock-history me-1"></i> PENDING
+                                    </button>
+                                    <button th:if="${item.isRecovered()}" type="submit" 
+                                            class="badge-recovered border-0 bg-transparent py-1 px-2" 
+                                            title="Click to revert to PENDING" style="cursor: pointer;">
+                                        <i class="bi bi-check-all me-1"></i> RECOVERED
+                                    </button>
+                                </form>
+                            </td>
+
+                            <!-- Action Buttons -->
+                            <td class="text-end">
+                                <div class="btn-group btn-group-sm">
+                                    <a th:href="@{'/items/' + ${item.id}}" class="btn btn-cf-outline" title="View Details">
+                                        <i class="bi bi-eye"></i>
+                                    </a>
+                                    <a th:href="@{'/items/' + ${item.id} + '/edit'}" class="btn btn-cf-outline" title="Edit Item">
+                                        <i class="bi bi-pencil"></i>
+                                    </a>
+                                    <form th:action="@{'/items/' + ${item.id} + '/delete'}" method="post" class="d-inline">
+                                        <input type="hidden" name="redirectSource" value="manage">
+                                        <button type="submit" class="btn btn-outline-danger btn-delete-confirm" 
+                                                th:data-item-name="${item.name}" title="Delete Item">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <div th:replace="~{fragments/layout :: footer}"></div>
+
+    <!-- Scripts -->
+    <div th:replace="~{fragments/layout :: scripts}"></div>
+</body>
+</html>
